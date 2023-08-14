@@ -53,19 +53,13 @@ public class PaymentController {
 		
 		//ReplyingKafkaTemplate 생성
 		ProducerRecord<String, String> record = new ProducerRecord<String, String>(requestTopic, request);
-		
 		record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, requestReplyTopic.getBytes()));
-		
 		RequestReplyFuture<String, String, String> sendAndReceive = kafkaTemplate.sendAndReceive(record);
-		
-		SendResult<String, String> sendResult = sendAndReceive.getSendFuture().get();
-		
-		sendResult.getProducerRecord().headers().forEach(header -> System.out.println(header.key() + ":" + header.value().toString()));
 		ConsumerRecord<String, String> consumerRecord = sendAndReceive.get();
 		String str = consumerRecord.value();
 		
 		//입찰가보다 낮을 경우 결과 바로 리턴
-		if(str.startsWith("제시")) {
+		if(str.startsWith("제시")||str.startsWith("연속")) {
 			return str;
 		}
 		
@@ -78,10 +72,11 @@ public class PaymentController {
 		
 		//기존 입찰자 계좌 환불
 		AccountEntity pre = repository.findByUserId(Long.parseLong(result.get("bidUser").toString()));
+		//기존 입찰자 없는 경우
 		if(pre==null) {
-			return "입찰 성공~";
+			return "입찰 성공~~";
 		}
-		pre.setBalance(Long.toString(Long.parseLong(pre.getBalance())+Long.parseLong(result.get("pay").toString())));
+		pre.setBalance(Long.toString(Long.parseLong(pre.getBalance())+Long.parseLong(result.get("bidPrice").toString())));
 		repository.save(pre);
 		
 		return "입찰 성공~";

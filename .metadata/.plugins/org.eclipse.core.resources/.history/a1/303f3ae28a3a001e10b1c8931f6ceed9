@@ -1,0 +1,9 @@
+package payment.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import payment.model.UserEntity;
+
+public interface UserRepository extends JpaRepository<UserEntity, Long>{
+
+}

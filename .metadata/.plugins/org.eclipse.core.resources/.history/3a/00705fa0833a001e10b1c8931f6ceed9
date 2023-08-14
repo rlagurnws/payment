@@ -1,0 +1,38 @@
+server:
+  port: 80
+  servlet:
+    context-path: /payment/
+
+spring:
+  application:
+    name : payment
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/payment?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+
+    
+  kafka:
+    consumer:
+      bootstrap-servers:
+      - localhost:9092
+      group-id: payment
+      auto-offset-reset: earliest
+      key-deserializer:
+        org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer:
+        org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      bootstrap-servers:
+      - localhost:9092
+      
+kafka:
+  bootstrap-servers: localhost:9092
+  topic:
+    requestreply-topic: reply
+    request-topic: bid-info

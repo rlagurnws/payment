@@ -1,5 +1,6 @@
 package payment.controller;
 
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -16,7 +17,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import payment.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import payment.model.AccountEntity;
+import payment.repository.AccountRepository;
 
 @RestController
 public class PaymentController {
@@ -31,26 +36,54 @@ public class PaymentController {
 	private String requestReplyTopic;
 	
 	@Autowired
-	private UserRepository repository;
+	private AccountRepository repository;
 	
 	@PostMapping(value="/order",produces=MediaType.APPLICATION_JSON_VALUE,consumes=MediaType.APPLICATION_JSON_VALUE)
-	public String pay(@RequestBody String request) throws InterruptedException, ExecutionException {
-		// create producer record
+	public String pay(@RequestBody Map<String,Object> map) throws InterruptedException, ExecutionException, JsonProcessingException {
+		//userId에 맞는 user 계좌 조회
+		AccountEntity ae = repository.findByUserId(Long.parseLong(map.get("userId").toString()));
+		//잔액 부족할 경우 바로 리턴
+		if(Long.parseLong(ae.getBalance()) < Long.parseLong(map.get("pay").toString())) {
+			return "잔액 부족";
+		}
+		
+		//map <-> JSON 위한 매퍼 생성
+		ObjectMapper mapper = new ObjectMapper();
+		String request = mapper.writeValueAsString(map);
+		
+		//ReplyingKafkaTemplate 생성
 		ProducerRecord<String, String> record = new ProducerRecord<String, String>(requestTopic, request);
-		// set reply topic in header
+		
 		record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, requestReplyTopic.getBytes()));
-		// post in kafka topic
+		
 		RequestReplyFuture<String, String, String> sendAndReceive = kafkaTemplate.sendAndReceive(record);
-
-		// confirm if producer produced successfully
+		
 		SendResult<String, String> sendResult = sendAndReceive.getSendFuture().get();
 		
-		//print all headers
 		sendResult.getProducerRecord().headers().forEach(header -> System.out.println(header.key() + ":" + header.value().toString()));
-		// get consumer record
 		ConsumerRecord<String, String> consumerRecord = sendAndReceive.get();
+		String str = consumerRecord.value();
 		
-		// return consumer value
-		return null;
+		//입찰가보다 낮을 경우 결과 바로 리턴
+		if(str.startsWith("제시")) {
+			return str;
+		}
+		
+		//받아온 JSON -> Map으로 변환
+		Map<String,Object> result = mapper.readValue(str,Map.class);
+		System.out.println(result);
+		//새롭게 입찰 시도한 user계좌 차감
+		ae.setBalance(Long.toString(Long.parseLong(ae.getBalance())-Long.parseLong(result.get("pay").toString())));
+		repository.save(ae);
+		
+		//기존 입찰자 계좌 환불
+		AccountEntity pre = repository.findByUserId(Long.parseLong(result.get("bidUser").toString()));
+		if(pre==null) {
+			return "입찰 성공~";
+		}
+		pre.setBalance(Long.toString(Long.parseLong(pre.getBalance())+Long.parseLong(result.get("pay").toString())));
+		repository.save(pre);
+		
+		return "입찰 성공~";
 	}
 }

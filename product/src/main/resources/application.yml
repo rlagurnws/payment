@@ -14,14 +14,14 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
 
     
   kafka:
     consumer:
       bootstrap-servers:
       - localhost:9092
-      group-id: payment
+      group-id: product
       auto-offset-reset: earliest
       key-deserializer:
         org.apache.kafka.common.serialization.StringDeserializer
@@ -34,5 +34,5 @@ spring:
 kafka:
   bootstrap-servers: localhost:9092
   topic:
-    requestreply-topic: reply
-    request-topic: bid-info
+    requestreply-topic: bidresult
+    request-topic: bidinfo

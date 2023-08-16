@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,11 +26,16 @@ public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	private String email;
 	private String name;
-	private String phoneNumber;
+	private String gender;
+	private String birth;
 	private String address;
+	private String email;
+	private String password;
+	private String phoneNumber;
+	private String role;
 	@CreationTimestamp
 	private Date regDate;
-	private String role;
+	@UpdateTimestamp
+	private Date updateDate;
 }

@@ -25,9 +25,9 @@ public class AuctionProductEntity {
 	private long id;
 	private long productId;
 	private long bidUser;
+	private String bidUserName;
 	private Date startTime;
 	private Date endTime;
 	private String bidPrice;
 	private String status;
-	private String price;
 }

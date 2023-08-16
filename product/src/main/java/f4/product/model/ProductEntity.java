@@ -28,4 +28,6 @@ public class ProductEntity {
 	private String technique;
 	private String style;
 	private String theme;
+	private String country;
+	private String price;
 }

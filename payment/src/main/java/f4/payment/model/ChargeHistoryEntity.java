@@ -27,10 +27,10 @@ public class ChargeHistoryEntity {
 	private long id;
 	private long accoungId;
 	private long userId;
-	private String chargePrice;
+	private String chargeBalance;
+	private String status;
 	@CreationTimestamp
 	private Date applicationDate;
 	@UpdateTimestamp
-	private Date depositDate;
-	private String status;
+	private Date approveDate;
 }

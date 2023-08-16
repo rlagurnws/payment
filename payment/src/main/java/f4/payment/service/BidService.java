@@ -2,6 +2,8 @@ package f4.payment.service;
 
 import java.util.Map;
 
+import f4.payment.model.UserEntity;
+import f4.payment.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +15,11 @@ public class BidService {
 
 	@Autowired
 	private AccountRepository repository;
-	
-	public AccountEntity getAE(Map<String, Object> map) {
-		return repository.findByUserId(Long.parseLong(map.get("userId").toString()));
+	@Autowired
+	private UserRepository uRepository;
+
+	public AccountEntity getAE(String userId) {
+		return repository.findByUserId(Long.parseLong(userId));
 	}
 	
 	public String done(Map<String,Object> result, AccountEntity ae) {
@@ -33,5 +37,8 @@ public class BidService {
 		
 		return result.get("result").toString();
 	}
-	
+
+	public UserEntity getUE(String id){
+		return uRepository.findById(Long.parseLong(id)).get();
+	}
 }

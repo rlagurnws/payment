@@ -27,7 +27,9 @@ public class AccountEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	private long userId;
+	private String userName;
 	private String balance;
+	private String password;
 	@CreationTimestamp
 	private Date creationDate;
 	@UpdateTimestamp

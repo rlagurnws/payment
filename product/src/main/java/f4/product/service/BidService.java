@@ -49,4 +49,8 @@ public class BidService {
 											 .build());
 		return map;
 	}
+
+	public ProductEntity getPE(String id){
+		return pr.findById(Long.parseLong(id)).get();
+	}
 }

@@ -1,8 +1,10 @@
 package f4.payment.controller;
 
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import f4.payment.model.AccountEntity;
+import f4.payment.model.UserEntity;
+import f4.payment.service.BidService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -16,12 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import f4.payment.model.AccountEntity;
-import f4.payment.repository.AccountRepository;
-import f4.payment.service.BidService;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class PaymentController {
@@ -36,18 +34,22 @@ public class PaymentController {
 	private String requestReplyTopic;
 
 	@Autowired
-	private AccountRepository repository;
-	
-	@Autowired
 	private BidService service;
 
-	@PostMapping(value = "/order", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public String pay(@RequestBody Map<String, Object> map)
-			throws InterruptedException, ExecutionException, JsonProcessingException {
-		AccountEntity ae = service.getAE(map);
+	//userId, productId, pay
+	@PostMapping(value = "/bid", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	public String bid(@RequestBody Map<String, Object> map) throws InterruptedException, ExecutionException, JsonProcessingException {
+		AccountEntity ae = service.getAE(map.get("userId").toString());
+		UserEntity ue = service.getUE(map.get("userId").toString());
+		//결제 비밀번호 확인 로직 필요
+
+
 		if (Long.parseLong(ae.getBalance()) < Long.parseLong(map.get("pay").toString())) {
 			return "잔액 부족";
 		}
+
+		map.put("email",ue.getEmail());
+		map.put("userName",ue.getName());
 
 		ObjectMapper mapper = new ObjectMapper();
 		String request = mapper.writeValueAsString(map);

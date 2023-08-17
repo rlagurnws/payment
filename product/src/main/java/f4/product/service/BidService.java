@@ -34,20 +34,23 @@ public class BidService {
 		return map;
 	}
 	
-	public Map<String,Object> done(Map<String, Object> map, AuctionProductEntity ape) {
-		map.put("bidUser", Long.toString(ape.getBidUser()));
-		map.put("bidPrice", ape.getBidPrice());
+	public boolean done(Map<String, Object> map, AuctionProductEntity ape) {
 		//Auction 정보 수정
-		ape.setBidPrice(map.get("pay").toString());
-		ape.setBidUser(Long.parseLong(map.get("userId").toString()));
-		repository.save(ape);
-		//history 추가
-		pahr.save(ProductAuctionHistoryEntity.builder()
-											 .productId(ape.getProductId())
-											 .bidUser(Long.parseLong(map.get("userId").toString()))
-											 .bidPrice(map.get("pay").toString())
-											 .build());
-		return map;
+		try{
+			ape.setBidPrice(map.get("pay").toString());
+			ape.setBidUser(Long.parseLong(map.get("userId").toString()));
+			repository.save(ape);
+			//history 추가
+			pahr.save(ProductAuctionHistoryEntity.builder()
+												 .productId(ape.getProductId())
+												 .bidUser(Long.parseLong(map.get("userId").toString()))
+												 .bidPrice(map.get("pay").toString())
+												 .build());
+			return true;
+		} catch(Exception e){
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public ProductEntity getPE(String id){

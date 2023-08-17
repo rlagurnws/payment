@@ -80,12 +80,42 @@ public class KafkaConfig {
 		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
 				new JsonDeserializer<>(String.class));
 	}
-
 	@Bean
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
 		factory.setReplyTemplate(kafkaTemplate());
 		return factory;
+	}
+
+	@Bean
+	public ReplyingKafkaTemplate<String, String, Boolean> replyKafkaTemplate2(ProducerFactory<String, String> pf,
+																			KafkaMessageListenerContainer<String, Boolean> container) {
+		return new ReplyingKafkaTemplate<>(pf, container);
+
+	}
+
+	@Bean
+	public KafkaMessageListenerContainer<String, Boolean> replyContainer2(ConsumerFactory<String, Boolean> cf) {
+		ContainerProperties containerProperties = new ContainerProperties("transactionresult");
+		return new KafkaMessageListenerContainer<>(cf, containerProperties);
+	}
+
+	@Bean
+	public ConsumerFactory<String, Boolean> consumerFactory2() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
+				new JsonDeserializer<>(Boolean.class));
+	}
+	@Bean
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Boolean>> kafkaListenerContainerFactory2() {
+		ConcurrentKafkaListenerContainerFactory<String, Boolean> factory = new ConcurrentKafkaListenerContainerFactory<>();
+		factory.setConsumerFactory(consumerFactory2());
+		factory.setReplyTemplate(kafkaTemplate2());
+		return factory;
+	}
+
+	@Bean
+	public KafkaTemplate<String, String> kafkaTemplate2() {
+		return new KafkaTemplate<>(producerFactory());
 	}
 }

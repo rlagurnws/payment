@@ -43,15 +43,6 @@ public class KafkaConfig {
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 		return props;
 	}
-
-	@Bean
-	public Map<String, Object> consumerConfigs() {
-		Map<String, Object> props = new HashMap<>();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, "product");
-		return props;
-	}
-
 	@Bean
 	public ProducerFactory<String, String> producerFactory() {
 		return new DefaultKafkaProducerFactory<>(producerConfigs());
@@ -60,6 +51,14 @@ public class KafkaConfig {
 	@Bean
 	public KafkaTemplate<String, String> kafkaTemplate() {
 		return new KafkaTemplate<>(producerFactory());
+	}
+
+	@Bean
+	public Map<String, Object> consumerConfigs() {
+		Map<String, Object> props = new HashMap<>();
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, "product");
+		return props;
 	}
 
 	@Bean
@@ -80,6 +79,8 @@ public class KafkaConfig {
 		return new DefaultKafkaConsumerFactory<>(consumerConfigs(), new StringDeserializer(),
 				new JsonDeserializer<>(String.class));
 	}
+
+
 
 	@Bean
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory() {

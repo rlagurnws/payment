@@ -14,6 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @ToString
 @Entity
+@Builder
 public class TransactionHistory {
 
     @Id
